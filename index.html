@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Game Fikih Kelas VII SMP</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(#1d4350, #a43931);
+  color: white;
+  text-align: center;
+}
+h1 { margin-top: 20px; }
+#score { font-size: 20px; margin: 10px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 95px);
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.card {
+  width: 95px;
+  height: 115px;
+  background: #f1c40f;
+  color: black;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.card.open { background: white; }
+.card.wrong { background: crimson; color: white; }
+
+#taskBox {
+  margin-top: 20px;
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border-radius: 10px;
+  display: none;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🕌 Game Fikih Kelas VII SMP</h1>
+<p>Materi Wudu & Shalat</p>
+<div id="score">Skor: 0</div>
+
+<div class="grid" id="game"></div>
+<div id="taskBox"></div>
+
+<button onclick="startGame()">🔄 Main Lagi</button>
+
+<script>
+const benar = [
+  "Niat Wudu",
+  "Rukun Wudu",
+  "Sunah Wudu",
+  "Syarat Sah Shalat",
+  "Rukun Shalat",
+  "Sunah Shalat",
+  "Menutup Aurat",
+  "Shalat Tepat Waktu"
+];
+
+const salah = ["KESALAHAN","KESALAHAN","KESALAHAN","KESALAHAN"];
+
+const tugas = [
+  "💧 Sebutkan 3 rukun wudu!",
+  "🕌 Sebutkan 2 syarat sah shalat!",
+  "📖 Jelaskan niat wudu!",
+  "🧎 Sebutkan 3 rukun shalat!",
+  "🕋 Mengapa menutup aurat itu wajib?",
+  "⏰ Apa akibat meninggalkan shalat?"
+];
+
+let score = 0;
+let gameOver = false;
+
+// SOUND
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function sound(type){
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  o.frequency.value = type==="ok" ? 650 : 180;
+  g.gain.value = 0.15;
+  o.start(); o.stop(audioCtx.currentTime + 0.3);
+}
+
+function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
+
+function startGame(){
+  score = 0; gameOver = false;
+  document.getElementById("score").innerText = "Skor: 0";
+  document.getElementById("taskBox").style.display="none";
+  const cards = shuffle([...benar, ...salah]);
+  const game = document.getElementById("game");
+  game.innerHTML = "";
+  cards.forEach(v=>{
+    const d=document.createElement("div");
+    d.className="card"; d.innerText="?";
+    d.onclick=()=>openCard(d,v);
+    game.appendChild(d);
+  });
+}
+
+function openCard(card,val){
+  if(gameOver||card.classList.contains("open")) return;
+  card.classList.add("open"); card.innerText=val;
+  if(val==="KESALAHAN"){
+    card.classList.add("wrong"); sound("bad");
+    const t = tugas[Math.floor(Math.random()*tugas.length)];
+    document.getElementById("taskBox").innerHTML=
+      "<h3>📌 Tugas Fikih</h3><p>"+t+"</p>";
+    document.getElementById("taskBox").style.display="block";
+    gameOver=true;
+  } else {
+    sound("ok"); score++;
+    document.getElementById("score").innerText="Skor: "+score;
+  }
+}
+
+startGame();
+</script>
+
+</body>
+</html>
